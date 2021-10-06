@@ -21,9 +21,17 @@ export default function Auth() {
     }
   };
   const signInWithProvider = async (provider) => {
-    const { user, session, error } = await supabase.auth.signIn({
-      provider,
-    });
+    try {
+      setLoading(true);
+      const { user, session, error } = await supabase.auth.signIn({
+        provider,
+      });
+      if (error) throw error;
+    } catch (error) {
+      alert(error.error_description || error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

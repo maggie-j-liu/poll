@@ -1,99 +1,110 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../utils/supabaseClient'
+import { useState, useEffect } from "react";
+import { supabase } from "../utils/supabaseClient";
 
 export default function Account({ session }) {
-  const [loading, setLoading] = useState(true)
-  const [username, setUsername] = useState(null)
-  const [avatar_url, setAvatarUrl] = useState(null)
+  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState(null);
 
   useEffect(() => {
-    getProfile()
-  }, [session])
+    getProfile();
+  }, [session]);
 
-  async function getProfile() {
+  async function updateProfile({ username }) {
+    console.log("update", username);
     try {
-      setLoading(true)
-      const user = supabase.auth.user()
-
-      let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
-        .single()
-
-      if (error && status !== 406) {
-        throw error
-      }
-
-      if (data) {
-        setUsername(data.username)
-        setAvatarUrl(data.avatar_url)
-      }
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function updateProfile({ username, avatar_url }) {
-    try {
-      setLoading(true)
-      const user = supabase.auth.user()
+      setLoading(true);
+      const user = supabase.auth.user();
 
       const updates = {
         id: user.id,
         username,
-        avatar_url,
         updated_at: new Date(),
-      }
+      };
 
-      let { error } = await supabase.from('profiles').upsert(updates, {
-        returning: 'minimal', // Don't return the value after inserting
-      })
+      let { error } = await supabase.from("profiles").upsert(updates, {
+        returning: "minimal", // Don't return the value after inserting
+      });
 
       if (error) {
-        throw error
+        throw error;
       }
     } catch (error) {
-      alert(error.message)
+      alert(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
+    }
+  }
+
+  async function getProfile() {
+    try {
+      setLoading(true);
+      const user = supabase.auth.user();
+      console.log(user);
+
+      let { data, error, status } = await supabase
+        .from("profiles")
+        .select(`username`)
+        .eq("id", user.id)
+        .single();
+
+      if (error && status !== 406) {
+        throw error;
+      }
+      if (data) {
+        setUsername(data.username);
+      } else if (user.user_metadata.full_name) {
+        await updateProfile({ username: user.user_metadata.full_name });
+        setUsername(user.user_metadata.full_name);
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <div>
-      <h1>Update profile</h1>
-      <div>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="text" value={session.user.email} disabled />
-      </div>
-      <div>
-        <label htmlFor="username">Name</label>
+    <div className="w-80 mx-auto">
+      <h1 className="text-center text-4xl font-semibold">Update Profile</h1>
+      <div className="grid grid-rows-2 text-xl items-center mt-6">
+        <label htmlFor="username" className="row-start-1">
+          Name
+        </label>
         <input
           id="username"
           type="text"
-          value={username || ''}
+          value={username || ""}
           onChange={(e) => setUsername(e.target.value)}
+          className="row-start-1 input text-xl rounded-lg"
+        />
+        <label htmlFor="email" className="row-start-2 mt-4">
+          Email
+        </label>
+        <input
+          id="email"
+          type="text"
+          value={session.user.email}
+          disabled
+          className="row-start-2 mt-4 input text-xl rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
         />
       </div>
 
-      <div>
+      <div className="flex items-center justify-between mt-8">
         <button
-          className="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md focus:outline-none"
-          onClick={() => updateProfile({ username, avatar_url })}
-          disabled={loading}
+          className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md focus:outline-none disabled:cursor-not-allowed disabled:saturate-50"
+          onClick={() => updateProfile({ username })}
+          disabled={loading || !username || username.length < 3}
         >
-          {loading ? 'Loading ...' : 'Update'}
+          {loading ? "Loading ..." : "Update"}
         </button>
-      </div>
 
-      <div>
-        <button className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md focus:outline-none" onClick={() => supabase.auth.signOut()}>
+        <button
+          className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md focus:outline-none"
+          onClick={() => supabase.auth.signOut()}
+        >
           Sign Out
         </button>
       </div>
     </div>
-  )
+  );
 }
