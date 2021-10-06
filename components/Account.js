@@ -24,9 +24,17 @@ export default function Account({ session }) {
       let { error } = await supabase.from("profiles").upsert(updates, {
         returning: "minimal", // Don't return the value after inserting
       });
-
       if (error) {
         throw error;
+      }
+
+      let { error: authError } = await supabase.auth.update({
+        data: {
+          full_name: username,
+        },
+      });
+      if (authError) {
+        throw authError;
       }
     } catch (error) {
       alert(error.message);
@@ -39,7 +47,6 @@ export default function Account({ session }) {
     try {
       setLoading(true);
       const user = supabase.auth.user();
-      console.log(user);
 
       let { data, error, status } = await supabase
         .from("profiles")
