@@ -6,11 +6,11 @@ import Account from "components/Account";
 import useAuth from "utils/useAuth";
 
 export default function Home() {
-  const { session, user } = useAuth();
+  const { session, user, loading } = useAuth();
 
   return (
     <div className="bg-gray-200 h-screen" style={{ padding: "50px 0 100px 0" }}>
-      {!session ? <Auth /> : <Account key={user.id} session={session} />}
+      {loading ? null : session ? <div>logged in</div> : <Auth />}
     </div>
   );
 }

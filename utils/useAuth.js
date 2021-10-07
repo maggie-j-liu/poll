@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
-const initialState = { session: null, user: null };
+const initialState = { session: null, user: null, loading: true };
 const AuthContext = createContext(initialState);
 
 export const AuthProvider = ({ children }) => {
@@ -9,14 +9,16 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const session = supabase.auth.session();
     if (session) {
-      setAuth({ user: session.user, session });
+      setAuth({ user: session.user, session, loading: false });
+    } else {
+      setAuth({ ...initialState, loading: false });
     }
     return supabase.auth.onAuthStateChange((_event, session) => {
       console.log(session);
       if (session) {
-        setAuth({ user: session.user, session });
+        setAuth({ user: session.user, session, loading: false });
       } else {
-        setAuth(initialState);
+        setAuth({ ...initialState, loading: false });
       }
     });
   }, []);
