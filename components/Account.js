@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import useAuth from "utils/useAuth";
 import { supabase } from "../utils/supabaseClient";
 
-export default function Account({ session }) {
+export default function Account() {
+  const { user, session } = useAuth();
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState(null);
 
@@ -89,7 +91,7 @@ export default function Account({ session }) {
         <input
           id="email"
           type="text"
-          value={session.user.email}
+          value={user.email}
           disabled
           className="row-start-2 mt-4 input text-xl rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
         />

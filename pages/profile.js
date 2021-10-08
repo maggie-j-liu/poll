@@ -10,10 +10,10 @@ const Profile = () => {
       router.replace("/");
     }
   }, [session, loading, router]);
-  if (loading) return null;
+  if (loading || !session) return null;
   return (
     <div className="bg-gray-200 h-screen" style={{ padding: "50px 0 100px 0" }}>
-      <Account session={session} />
+      <Account />
     </div>
   );
 };
