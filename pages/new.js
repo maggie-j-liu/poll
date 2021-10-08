@@ -16,8 +16,7 @@ const New = () => {
     const { data, error } = await supabase
       .from("polls")
       .insert([{ title, created_at: new Date(), creator_id: user.id }]);
-    console.log(data);
-    router.push(`/poll/${data[0].id}`);
+    router.push(`/poll/${data[0].id}/edit`);
   };
   if (loading) return null;
   return (

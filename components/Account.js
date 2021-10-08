@@ -38,7 +38,6 @@ export default function Account() {
   }, [session]);
 
   async function updateProfile({ username }) {
-    console.log("update", username);
     try {
       setLoading(true);
       const user = supabase.auth.user();

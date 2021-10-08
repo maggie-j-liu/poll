@@ -2,9 +2,9 @@ import { useState } from "react";
 import EditQuestion from "./EditQuestion";
 import { supabase } from "utils/supabaseClient";
 
-const EditPoll = ({ poll }) => {
+const EditPoll = ({ poll, questions: initialQuestions }) => {
   const [title, setTitle] = useState(poll.title);
-  const [questions, setQuestions] = useState(poll.questions);
+  const [questions, setQuestions] = useState(initialQuestions);
   const handleAddQuestion = () => {
     setQuestions([
       ...questions,
