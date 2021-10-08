@@ -9,7 +9,7 @@ const Profile = () => {
     if (!loading && !session) {
       router.replace("/");
     }
-  }, [session, loading]);
+  }, [session, loading, router]);
   if (loading) return null;
   return (
     <div className="bg-gray-200 h-screen" style={{ padding: "50px 0 100px 0" }}>

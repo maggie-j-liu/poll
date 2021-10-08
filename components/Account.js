@@ -6,6 +6,32 @@ export default function Account({ session }) {
   const [username, setUsername] = useState(null);
 
   useEffect(() => {
+    async function getProfile() {
+      try {
+        setLoading(true);
+        const user = supabase.auth.user();
+
+        let { data, error, status } = await supabase
+          .from("profiles")
+          .select(`username`)
+          .eq("id", user.id)
+          .single();
+
+        if (error && status !== 406) {
+          throw error;
+        }
+        if (data) {
+          setUsername(data.username);
+        } else if (user.user_metadata.full_name) {
+          await updateProfile({ username: user.user_metadata.full_name });
+          setUsername(user.user_metadata.full_name);
+        }
+      } catch (error) {
+        alert(error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
     getProfile();
   }, [session]);
 
@@ -35,33 +61,6 @@ export default function Account({ session }) {
       });
       if (authError) {
         throw authError;
-      }
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function getProfile() {
-    try {
-      setLoading(true);
-      const user = supabase.auth.user();
-
-      let { data, error, status } = await supabase
-        .from("profiles")
-        .select(`username`)
-        .eq("id", user.id)
-        .single();
-
-      if (error && status !== 406) {
-        throw error;
-      }
-      if (data) {
-        setUsername(data.username);
-      } else if (user.user_metadata.full_name) {
-        await updateProfile({ username: user.user_metadata.full_name });
-        setUsername(user.user_metadata.full_name);
       }
     } catch (error) {
       alert(error.message);

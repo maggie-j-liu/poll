@@ -11,12 +11,13 @@ const New = () => {
     if (!loading && !user) {
       router.replace("/");
     }
-  }, [user, loading]);
+  }, [user, loading, router]);
   const handleCreate = async () => {
     const { data, error } = await supabase
       .from("polls")
       .insert([{ title, created_at: new Date(), creator_id: user.id }]);
     console.log(data);
+    router.push(`/poll/${data[0].id}`);
   };
   if (loading) return null;
   return (
