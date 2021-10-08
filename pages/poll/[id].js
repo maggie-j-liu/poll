@@ -21,9 +21,15 @@ export const getServerSideProps = async ({ params }) => {
       notFound: true,
     };
   }
+  const poll = polls[0];
+  const { data: pollQuestions } = await supabase
+    .from("questions")
+    .select("*")
+    .eq("poll_id", params.id);
+  poll.questions = pollQuestions;
   return {
     props: {
-      poll: polls[0],
+      poll,
     },
   };
 };

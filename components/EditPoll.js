@@ -21,9 +21,40 @@ const EditPoll = ({ poll }) => {
     setQuestions([...questions]);
   };
   const handleSave = async () => {
-    const { error } = await supabase
-      .from("questions")
-      .upsert(questions, { returning: "minimal" });
+    const hasId = [];
+    const hasIdOrder = [];
+    const noId = [];
+    const noIdOrder = [];
+    for (let i = 0; i < questions.length; i++) {
+      (questions[i].id ? hasId : noId).push(questions[i]);
+      (questions[i].id ? hasIdOrder : noIdOrder).push(i);
+    }
+    await supabase.from("questions").upsert(hasId, { returning: "minimal" });
+    const { data } = await supabase.from("questions").insert(noId);
+    const newQuestions = [];
+    let i = 0;
+    let j = 0;
+    while (i < hasId.length && j < noId.length) {
+      if (hasIdOrder[i] < noIdOrder[j]) {
+        newQuestions.push(hasId[i]);
+        i++;
+      } else {
+        newQuestions.push(data[j]);
+        j++;
+      }
+    }
+    for (let ii = i; ii < hasId.length; ii++) {
+      newQuestions.push(hasId[ii]);
+    }
+    for (let jj = j; jj < data.length; jj++) {
+      newQuestions.push(data[jj]);
+    }
+    const newQuestionIds = newQuestions.map((q) => q.id);
+    await supabase
+      .from("polls")
+      .update({ questions: newQuestionIds })
+      .eq("id", poll.id);
+    setQuestions(newQuestions);
   };
   return (
     <div className="bg-gray-100 min-h-screen">
